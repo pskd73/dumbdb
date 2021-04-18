@@ -1,5 +1,5 @@
 from cache import Cache
-from physical_storage import PhysicalStorage
+from db_file import PhysicalStorage
 from datetime import datetime
 
 DB_FILE_PATH = '/tmp/dumbdb'
