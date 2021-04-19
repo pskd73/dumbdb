@@ -29,7 +29,7 @@ class DbFile:
         with open(self.file_path, 'r') as f:
             return f.read()
 
-    def write(self, data: str, block_address: int=None) -> int:
+    def raw_write(self, data: str, block_address: int = None) -> int:
         with open(self.file_path, 'r+') as f:
             if block_address is not None:
                 f.seek(block_address)
@@ -39,9 +39,14 @@ class DbFile:
             f.write(self._pad(data))
             return starting_address
 
-    def fetch(self, block_address: int) -> str:
+    def raw_fetch(self, block_address: int) -> str:
         with open(self.file_path, 'r+') as f:
             f.seek(block_address)
             raw_data = f.read(self.block_size)
+            if raw_data == '':
+                raise ValueError('Invalid block address {}'.format(block_address))
             return self._unpad(raw_data)
 
+    def raw_wipe(self):
+        file = open(self.file_path, 'w')
+        file.close()

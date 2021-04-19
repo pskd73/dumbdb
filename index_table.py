@@ -1,6 +1,5 @@
-import os
 import base64
-from db_file import DbFile
+from db_file.base import DbFile
 from typing import List, Tuple
 
 from size import KB
@@ -10,10 +9,8 @@ TIndexes = List[TIndex]
 
 
 class IndexTable:
-    def __init__(self, fp, block_size: int = KB):
-        self.block_size = block_size
-        self.file = DbFile(fp, self.block_size)
-        self.file.init()
+    def __init__(self, db_file: DbFile):
+        self.file = db_file
 
     @staticmethod
     def _encode_key(encoded_key: str) -> str:
@@ -45,12 +42,15 @@ class IndexTable:
         return indexes
 
     def _can_add_new_index(self, raw_existing_indexes: str, raw_new_index: str) -> bool:
-        if len('{}|{}'.format(raw_existing_indexes, raw_new_index).encode()) <= self.block_size:
+        if len('{}|{}'.format(raw_existing_indexes, raw_new_index).encode()) <= self.file.block_size:
             return True
         return False
 
-    def update(self, key: str, value_address: int, address: int = None):
-        existing_indexes = self.file.fetch(address)
+    def update(self, key: str, value_address: int, address: int):
+        try:
+            existing_indexes = self.file.raw_fetch(address)
+        except ValueError:
+            existing_indexes = ''
         if not self._can_add_new_index(existing_indexes, self._to_raw_indexes([(key, value_address)])):
             existing_indexes = ''
             address = None
@@ -59,8 +59,10 @@ class IndexTable:
         else:
             indexes = self._parse_raw_indexes(existing_indexes)
         self._append_index(indexes, (key, value_address))
-        return self.file.write(self._to_raw_indexes(indexes), address)
+        return self.file.raw_write(self._to_raw_indexes(indexes), address)
 
     def fetch(self, address: int) -> TIndexes:
-        return self._parse_raw_indexes(self.file.fetch(address))
+        return self._parse_raw_indexes(self.file.raw_fetch(address))
 
+    def wipe(self):
+        self.file.raw_wipe()
