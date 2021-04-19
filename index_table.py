@@ -49,7 +49,7 @@ class IndexTable:
             return True
         return False
 
-    def update(self, address: int, key: str, value_address: int):
+    def update(self, key: str, value_address: int, address: int = None):
         existing_indexes = self.file.fetch(address)
         if not self._can_add_new_index(existing_indexes, self._to_raw_indexes([(key, value_address)])):
             existing_indexes = ''
