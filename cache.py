@@ -1,6 +1,16 @@
 import logging
 from collections import defaultdict
-from storage import Storage
+from abc import abstractmethod
+
+
+class Storage:
+    @abstractmethod
+    def put(self, key, value):
+        pass
+
+    @abstractmethod
+    def get(self, key):
+        pass
 
 
 class Cache(Storage):
