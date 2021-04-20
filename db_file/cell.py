@@ -15,11 +15,5 @@ class CellDbFile:
     def write_to_cell(self, data: bytes, block_address: int, cell_idx: int):
         self.file.raw_write(data, self.cell_sizes[cell_idx], self.get_cell_address(block_address, cell_idx))
 
-    def write_to_block(self, data: bytes, block_address: int):
-        self.file.raw_write(data, self.block_size, block_address)
-
     def get_cell(self, block_address: int, cell_idx: int) -> bytes:
         return self.file.raw_fetch(self.get_cell_address(block_address, cell_idx), self.cell_sizes[cell_idx])
-
-    def get_block(self, block_address: int) -> bytes:
-        return self.file.raw_fetch(block_address, self.block_size)
