@@ -1,8 +1,6 @@
 import os
 from unittest import TestCase
-
-from db_file.base import DbFile
-from index_table import IndexTable
+from indexing.table import IndexTable
 
 
 class TestIndexTable(TestCase):
