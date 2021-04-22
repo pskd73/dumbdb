@@ -3,21 +3,25 @@ from db_file.block_json import BlockJsonDbFile
 
 
 class IndexTable(BlockJsonDbFile):
-    def _can_add_new_index(self, existing_indexes: dict, key, address: int) -> bool:
-        existing_indexes[key] = address
-        return len(json.dumps(existing_indexes).encode()) <= self.block_size
+    def _try_add_entry(self, existing_indexes: dict, start_key, end_key, address: int):
+        existing_indexes['indexes'].append({
+            'start_key': start_key,
+            'end_key': end_key,
+            'address': address
+        })
+        assert len(json.dumps(existing_indexes).encode()) <= self.block_size
 
-    def update(self, key, value_address: int, address: int) -> int:
+    def update(self, start_key, end_key, value_address: int, address: int) -> int:
         try:
             existing_indexes = self.fetch_json(address)
         except ValueError:
-            existing_indexes = {}
-        if not self._can_add_new_index(existing_indexes, key, value_address):
-            existing_indexes = {}
+            existing_indexes = {'indexes': []}
+        try:
+            self._try_add_entry(existing_indexes, start_key, end_key, value_address)
+        except AssertionError:
+            existing_indexes = {'indexes': []}
+            self._try_add_entry(existing_indexes, start_key, end_key, value_address)
             address = None
-            if key in existing_indexes:
-                print('WARNING: Need to split the index block for key: {}, address: {}'.format(key, address))
-        existing_indexes[key] = value_address
         return self.write_json(existing_indexes, address)
 
     def fetch(self, address: int) -> dict:
