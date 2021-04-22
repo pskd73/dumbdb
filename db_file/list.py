@@ -16,8 +16,8 @@ def to_str(pairs: List[List[str]]) -> str:
 
 
 class ListDbFile(BlockDbFile):
-    def write_json(self, data: List[List[str]], block_address: int = None) -> int:
+    def write_list(self, data: List[List[str]], block_address: int = None) -> int:
         return self.write_block(to_str(data).encode(), block_address)
 
-    def fetch_json(self, block_address: int) -> List[List[str]]:
+    def fetch_list(self, block_address: int) -> List[List[str]]:
         return from_str(self.fetch_block(block_address).decode())
